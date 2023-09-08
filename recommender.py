@@ -18,6 +18,7 @@ def pickle_files_saving():
     day_list = df["product_id"].unique().tolist()
     df["product_id"] = np.random.choice(day_list, size=len(df))
     df['customer_no'] = np.random.randint(1,10, size=len(df))
+    df.drop_duplicates(subset=['product_id'], keep='last', inplace=True)
     df = df.astype({'customer_no':'int', "product_id":'str', 'gross_price':'float'})
 
     data = df.copy()
