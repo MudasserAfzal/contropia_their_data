@@ -1,27 +1,41 @@
 import pandas as pd
 import numpy as np
 import pandas as pd
+import json
 from surprise import Dataset, Reader, SVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from ast import literal_eval
 import pickle
 
 
 def pickle_files_saving():
 
     df = pd.read_csv("new_data_final_dataframe.csv")
-    df["line_items"] = df["line_items"].apply(literal_eval)
-    df = df.explode("line_items")
-    df = pd.concat([df, df.pop("line_items").apply(pd.Series)], axis=1)
-    df.drop(['shipping_address'], axis=1, inplace=True)
-    day_list = df["product_id"].unique().tolist()
-    df["product_id"] = np.random.choice(day_list, size=len(df))
-    df['customer_no'] = np.random.randint(1,10, size=len(df))
-    df.drop_duplicates(subset=['product_id'], keep='last', inplace=True)
-    df = df.astype({'customer_no':'int', "product_id":'str', 'gross_price':'float'})
+    for i in range(len(df)):
+        input_string = df["line_items"][i].replace("\"", "'")
+        json_string = input_string.replace("'", "\"").replace('"r ', ', ')
+        list_of_dicts = json.loads(json_string)
+        df["line_items"][i] = list_of_dicts[0]
 
-    data = df.copy()
+    expanded_df = pd.json_normalize(df['line_items'])
+
+    # Concatenate the original DataFrame and the expanded DataFrame
+    result_df = pd.concat([df.drop('line_items', axis=1), expanded_df], axis=1)
+
+    # Reset the index if needed
+    result_df.reset_index(drop=True, inplace=True)
+
+    # df["line_items"] = df["line_items"].apply(literal_eval)
+    # df = df.explode("line_items")
+    # df = pd.concat([df, df.pop("line_items").apply(pd.Series)], axis=1)
+    # df.drop(['shipping_address'], axis=1, inplace=True)
+    # day_list = df["product_id"].unique().tolist()
+    # df["product_id"] = np.random.choice(day_list, size=len(df))
+    result_df['customer_no'] = np.random.randint(1,10, size=len(result_df))
+    # df.drop_duplicates(subset=['product_id'], keep='last', inplace=True)
+    result_df = result_df.astype({'customer_no':'int', "product_id":'str', 'gross_price':'float'})
+
+    data = result_df.copy()
     # convert customer_no to int
     data['customer_no'] = data['customer_no'].astype(int)
 

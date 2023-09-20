@@ -4,12 +4,7 @@ from recommender import pickle_files_saving
 import pickle
 from utilities import get_top_recommendations
 import pandas as pd
-import numpy as np
 import os
-from surprise import Dataset, Reader, SVD
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from ast import literal_eval
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
